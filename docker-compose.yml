@@ -1,0 +1,38 @@
+version: '2.0'
+
+services:
+   presta_database:
+     image: mysql:5.7
+     volumes:
+       - /var/lib/mysql
+       - ./mysql_data:/docker-entrypoint-initdb.d
+     environment:
+       - MYSQL_ROOT_PASSWORD=root
+       - MYSQL_DATABASE=prestashop_database
+       - MYSQL_USER=dbuser
+       - MYSQL_PASSWORD=dbuser
+
+   prestashop:
+     depends_on:
+       - presta_database
+     image: prestashop/prestashop:1.7.2.4
+     volumes:
+       - ./src/html:/var/www/html
+     ports:
+       - 8080:80
+     environment:
+       - PS_INSTALL_AUTO=0
+       - DB_SERVER=presta_database
+       - DB_USER=dbuser
+       - DB_PASSWD=dbuser
+       - DB_NAME=prestashop_database
+       - PS_DEV_MODE=1
+   
+   phpmyadmin:
+     image: phpmyadmin/phpmyadmin
+     ports:
+       - 81:80
+     environment:
+       - PMA_HOST=presta_database
+       - PMA_USER=root
+       - PMA_PASSWORD=root
